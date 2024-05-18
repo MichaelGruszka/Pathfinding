@@ -21,6 +21,7 @@ namespace GameArea
         [SerializeField] private LayerMask _AreaLayerMask;
         private Coroutine _findPathCoroutineHandle;
         public event Action<NativeList<int2>> PathFound;
+        public event Action NewAreaCreated;
 
         private void Start()
         {
@@ -34,6 +35,7 @@ namespace GameArea
             var viewScale = _GameAreaView.transform.lossyScale;
             GridUtils.CreateNewGrid(_Width, _Height, new float2(viewScale.x, viewScale.z), _GameAreaDataCache);
             _GameAreaView.UpdateGrid();
+            NewAreaCreated?.Invoke();
         }
         public void FindPath(Vector3 start, Vector3 end)
         {

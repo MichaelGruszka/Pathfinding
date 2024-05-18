@@ -13,7 +13,7 @@ namespace GameArea
 
         private void Start()
         {
-            for (int i = 3; i < transform.childCount; i++) // avoid background
+            for (int i = 1; i < transform.childCount; i++) // avoid background
             {
                 Destroy(transform.GetChild(i).gameObject);
             }

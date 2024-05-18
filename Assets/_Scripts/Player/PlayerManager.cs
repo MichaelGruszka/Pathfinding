@@ -24,13 +24,26 @@ namespace Player
                 _movingCoroutineHandle = StartCoroutine(MoveCoroutine(path));
             }
         }
+        private void CancelMovement()
+        {
+            if (_movingCoroutineHandle != null)
+            {
+                StopCoroutine(_movingCoroutineHandle);
+                _movingCoroutineHandle = null;
+                _isMoving = false;
+            }
+            _PlayerView.transform.localPosition = Vector3.zero;
+        }
         private void Start()
         {
             _GameAreaManager.PathFound += Move;
+            _GameAreaManager.NewAreaCreated += CancelMovement;
         }
+
         private void OnDestroy()
         {
             _GameAreaManager.PathFound -= Move;
+            _GameAreaManager.NewAreaCreated -= CancelMovement;
         }
         private void Update()
         {
