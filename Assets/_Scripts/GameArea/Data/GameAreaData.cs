@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Unity.Mathematics;
 using Utils;
 using UnityEngine;
@@ -15,7 +14,7 @@ namespace GameArea.Data
         public int Width => _Width;
         public int Height => _Height;
         public float2 Scale => _Scale;
-        public IReadOnlyList<GridCell> Grid => _Grid;
+        public GridCell[] Grid => _Grid; // lazy, but can create native array without IReadOnlyList to array conversion 
 
         void IGameDataWrite.Save(int width, int height, float2 scale, GridCell[] grid)
         {

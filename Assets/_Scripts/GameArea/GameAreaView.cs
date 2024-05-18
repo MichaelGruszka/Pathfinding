@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using GameArea.Data;
 using GameArea.Utils;
-using Unity.Mathematics;
 using UnityEngine;
 namespace GameArea
 {
@@ -9,21 +8,36 @@ namespace GameArea
     {
         [SerializeField] private GameObject _ObstaclePrefab;
         [SerializeField] private GameAreaData _GameAreaCachedData;
+        [SerializeField] private Transform _BackgroundPlane;
         private Dictionary<int, GameObject> _GridIndexToObstacleObject = new Dictionary<int, GameObject>();
 
+        private void Start()
+        {
+            for (int i = 3; i < transform.childCount; i++) // avoid background
+            {
+                Destroy(transform.GetChild(i).gameObject);
+            }
+            UpdateGrid();
+        }
+        public void UpdateCell(int index)
+        {
+            if (_GameAreaCachedData.Grid[index].Obstacle)
+            {
+                TryAddObstacle(index);
+            }
+            else
+            {
+                TryRemoveObstacle(index);
+            }
+        }
         [ContextMenu(nameof(UpdateGrid))]
         public void UpdateGrid()
         {
-            for (int i = 0; i < _GameAreaCachedData.Grid.Count; i++)
+            _BackgroundPlane.localPosition = new Vector3(_GameAreaCachedData.Width / 2, 0, _GameAreaCachedData.Height / 2);
+            _BackgroundPlane.localScale = new Vector3(_GameAreaCachedData.Width / 10, 1, _GameAreaCachedData.Height / 10);
+            for (int i = 0; i < _GameAreaCachedData.Grid.Length; i++)
             {
-                if (_GameAreaCachedData.Grid[i].Obstacle)
-                {
-                    TryAddObstacle(i);
-                }
-                else
-                {
-                    TryRemoveObstacle(i);
-                }
+                UpdateCell(i);
             }
         }
         private void TryAddObstacle(int index)
@@ -41,6 +55,10 @@ namespace GameArea
         }
         private void TryRemoveObstacle(int index)
         {
+            if (_GridIndexToObstacleObject.TryGetValue(index, out var obstacle))
+            {
+                Destroy(obstacle);
+            }
             _GridIndexToObstacleObject.Remove(index);
         }
     }
