@@ -37,7 +37,7 @@ namespace PathFinding
 
             OpenSet[GetIndex(Start)] = true;
             GScore[Start] = 0;
-            FScore[Start] = math.distance(Start, End);
+            FScore[Start] = SquaredDistance(Start, End);
 
             while (HasOpenNodes())
             {
@@ -59,22 +59,26 @@ namespace PathFinding
                     if (ClosedSet[GetIndex(neighbor)] || Grid[GetIndex(neighbor)].Obstacle)
                         continue;
 
-                    float tentativeGScore = GScore[current] + math.distance(current, neighbor);
+                    float tentativeGScore = GScore[current] + SquaredDistance(current, neighbor);
 
                     if (!OpenSet[GetIndex(neighbor)] || tentativeGScore < GScore[neighbor])
                     {
                         CameFrom[neighbor] = current;
                         GScore[neighbor] = tentativeGScore;
-                        FScore[neighbor] = GScore[neighbor] + math.distance(neighbor, End);
+                        FScore[neighbor] = GScore[neighbor] + SquaredDistance(neighbor, End);
                         if (!OpenSet[GetIndex(neighbor)])
                             OpenSet[GetIndex(neighbor)] = true;
                     }
                 }
-
                 neighbors.Dispose();
             }
         }
-
+        private static float SquaredDistance(int2 a, int2 b)
+        {
+            int dx = a.x - b.x;
+            int dy = a.y - b.y;
+            return dx * dx + dy * dy;
+        }
         private bool HasOpenNodes()
         {
             int size = GridSize.x * GridSize.y;
