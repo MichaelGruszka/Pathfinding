@@ -22,6 +22,7 @@ namespace GameArea
         private Coroutine _findPathCoroutineHandle;
         public event Action<NativeList<int2>> PathFound;
         public event Action NewAreaCreated;
+        public event Action<TimeSpan> PathFoundTime;
 
         private void Start()
         {
@@ -100,6 +101,7 @@ namespace GameArea
             watch.Stop();
             handle.Complete();
             Debug.Log($"done in {watch.Elapsed}");
+            PathFoundTime?.Invoke(watch.Elapsed);
             // Use path here
             for (int i = 0; i < path.Length - 1; i++)
             {
