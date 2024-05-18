@@ -12,21 +12,159 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daeed6adbc766354da5887399619cf6a, type: 3}
   m_Name: GameAreaData
   m_EditorClassIdentifier: 
-  _Width: 0
-  _Height: 0
+  _Width: 5
+  _Height: 10
   _Scale:
-    x: 0
-    y: 0
+    x: 1
+    y: 1
   _Grid:
   - X: 0
     Y: 0
     Obstacle: 0
-  - X: 0
+  - X: 1
+    Y: 0
+    Obstacle: 0
+  - X: 2
+    Y: 0
+    Obstacle: 0
+  - X: 3
+    Y: 0
+    Obstacle: 0
+  - X: 4
     Y: 0
     Obstacle: 0
   - X: 0
-    Y: 0
+    Y: 1
+    Obstacle: 0
+  - X: 1
+    Y: 1
+    Obstacle: 0
+  - X: 2
+    Y: 1
+    Obstacle: 0
+  - X: 3
+    Y: 1
+    Obstacle: 0
+  - X: 4
+    Y: 1
     Obstacle: 0
   - X: 0
-    Y: 0
+    Y: 2
+    Obstacle: 0
+  - X: 1
+    Y: 2
+    Obstacle: 0
+  - X: 2
+    Y: 2
+    Obstacle: 0
+  - X: 3
+    Y: 2
+    Obstacle: 0
+  - X: 4
+    Y: 2
+    Obstacle: 0
+  - X: 0
+    Y: 3
+    Obstacle: 0
+  - X: 1
+    Y: 3
+    Obstacle: 0
+  - X: 2
+    Y: 3
+    Obstacle: 0
+  - X: 3
+    Y: 3
+    Obstacle: 0
+  - X: 4
+    Y: 3
+    Obstacle: 0
+  - X: 0
+    Y: 4
+    Obstacle: 0
+  - X: 1
+    Y: 4
+    Obstacle: 0
+  - X: 2
+    Y: 4
+    Obstacle: 0
+  - X: 3
+    Y: 4
+    Obstacle: 0
+  - X: 4
+    Y: 4
+    Obstacle: 0
+  - X: 0
+    Y: 5
+    Obstacle: 0
+  - X: 1
+    Y: 5
+    Obstacle: 0
+  - X: 2
+    Y: 5
+    Obstacle: 0
+  - X: 3
+    Y: 5
+    Obstacle: 0
+  - X: 4
+    Y: 5
+    Obstacle: 0
+  - X: 0
+    Y: 6
+    Obstacle: 0
+  - X: 1
+    Y: 6
+    Obstacle: 0
+  - X: 2
+    Y: 6
+    Obstacle: 0
+  - X: 3
+    Y: 6
+    Obstacle: 0
+  - X: 4
+    Y: 6
+    Obstacle: 0
+  - X: 0
+    Y: 7
+    Obstacle: 0
+  - X: 1
+    Y: 7
+    Obstacle: 0
+  - X: 2
+    Y: 7
+    Obstacle: 0
+  - X: 3
+    Y: 7
+    Obstacle: 0
+  - X: 4
+    Y: 7
+    Obstacle: 0
+  - X: 0
+    Y: 8
+    Obstacle: 0
+  - X: 1
+    Y: 8
+    Obstacle: 0
+  - X: 2
+    Y: 8
+    Obstacle: 0
+  - X: 3
+    Y: 8
+    Obstacle: 0
+  - X: 4
+    Y: 8
+    Obstacle: 0
+  - X: 0
+    Y: 9
+    Obstacle: 0
+  - X: 1
+    Y: 9
+    Obstacle: 0
+  - X: 2
+    Y: 9
+    Obstacle: 0
+  - X: 3
+    Y: 9
+    Obstacle: 0
+  - X: 4
+    Y: 9
     Obstacle: 0

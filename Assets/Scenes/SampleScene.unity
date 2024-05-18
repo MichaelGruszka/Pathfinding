@@ -465,7 +465,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7aff30e88f4242d492d5a02d94afb0fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _ObstaclePrefab: {fileID: 0}
+  _ObstaclePrefab: {fileID: 1359679714927361859, guid: 2692db868e5c0084e8c35bed0cc3d2c5, type: 3}
+  _GameAreaCachedData: {fileID: 11400000, guid: 2930040ebcc35f04384d0b8976c24f31, type: 2}
 --- !u!1 &1896053738
 GameObject:
   m_ObjectHideFlags: 0
