@@ -15,14 +15,25 @@ namespace GameArea.Data
         public int Width => _Width;
         public int Height => _Height;
         public float2 Scale => _Scale;
-        public IReadOnlyCollection<GridCell> Grid => _Grid;
-        
+        public IReadOnlyList<GridCell> Grid => _Grid;
+
         void IGameDataWrite.Save(int width, int height, float2 scale, GridCell[] grid)
         {
             _Width = width;
             _Height = height;
             _Scale = scale;
             _Grid = grid;
+            #if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.AssetDatabase.SaveAssetIfDirty(this);
+            #endif
+        }
+        void IGameDataWrite.IsObstacle(int index, bool isObstacle)
+        {
+            if (index >= 0 && index < _Grid.Length)
+            {
+                _Grid[index].Obstacle = isObstacle;
+            }
         }
     }
 }

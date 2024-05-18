@@ -22,18 +22,29 @@ namespace GameArea.Utils
             }
             dataToWrite.Save(width, height, scale, grid);
         }
-        public static int GetIndex(Vector3 position, float2 scale)
+        public static void SetIsObstacle(int index, bool isObstacle, IGameDataWrite gameData)
         {
-            int x = Mathf.FloorToInt(position.x / scale.x);
-            int y = Mathf.FloorToInt(position.y / scale.y);
-            return y * Mathf.FloorToInt(1 / scale.x) + x;
+            gameData.IsObstacle(index, isObstacle);
         }
-        public static Vector3 GetPosition(int index, float2 scale)
+        public static int GetIndex(Vector3 position, GameAreaData gameAreaData)
         {
-            int width = Mathf.FloorToInt(1 / scale.x); // Assuming the grid width based on scale
+            int width = gameAreaData.Width;
+            float2 scale = gameAreaData.Scale;
+
+            int x = Mathf.FloorToInt(position.x / scale.x);
+            int y = Mathf.FloorToInt(position.z / scale.y);
+
+            return y * width + x;
+        }
+        public static Vector3 GetPosition(int index, GameAreaData gameAreaData)
+        {
+            int width = gameAreaData.Width;
+            float2 scale = gameAreaData.Scale;
+
             int x = index % width;
             int y = index / width;
-            return new Vector3(x * scale.x, y * scale.y, 0);
+
+            return new Vector3(x * scale.x, 0, y * scale.y);
         }
     }
 }
