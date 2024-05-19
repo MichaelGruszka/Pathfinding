@@ -7,8 +7,8 @@ using PathFinding;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 namespace GameArea
 {
     public class GameAreaManager : MonoBehaviour
@@ -40,7 +40,7 @@ namespace GameArea
         }
         public void FindPath(Vector3 start, Vector3 end)
         {
-            if (_findPathCoroutineHandle == null)
+            if (_findPathCoroutineHandle == null && !_GameAreaDataCache.Grid[GridUtils.GetIndex(end, _GameAreaDataCache)].Obstacle)
             {
                 _findPathCoroutineHandle = StartCoroutine(FindPathCoroutine(start, end));
             }
@@ -69,15 +69,12 @@ namespace GameArea
             watch.Start();
             int2 start = new int2((int)startPos.x, (int)startPos.z);
             int2 end = new int2((int)endPos.x, (int)endPos.z);
-            int initialCapacity = _GameAreaDataCache.Width * _GameAreaDataCache.Height;
 
+            int initialCapacity = _GameAreaDataCache.Width * _GameAreaDataCache.Height;
             NativeArray<GridCell> nativeGrid = new NativeArray<GridCell>(_GameAreaDataCache.Grid, Allocator.TempJob);
             NativeList<int2> path = new NativeList<int2>(Allocator.TempJob);
             NativeArray<bool> openSet = new NativeArray<bool>(initialCapacity, Allocator.TempJob);
             NativeArray<bool> closedSet = new NativeArray<bool>(initialCapacity, Allocator.TempJob);
-            NativeHashMap<int2, int2> cameFrom = new NativeHashMap<int2, int2>(initialCapacity, Allocator.TempJob);
-            NativeHashMap<int2, float> gScore = new NativeHashMap<int2, float>(initialCapacity, Allocator.TempJob);
-            NativeHashMap<int2, float> fScore = new NativeHashMap<int2, float>(initialCapacity, Allocator.TempJob);
 
             PathfindingJob job = new PathfindingJob
             {
@@ -88,9 +85,6 @@ namespace GameArea
                 Path = path,
                 OpenSet = openSet,
                 ClosedSet = closedSet,
-                CameFrom = cameFrom,
-                GScore = gScore,
-                FScore = fScore
             };
 
             JobHandle handle = job.Schedule();
@@ -100,23 +94,12 @@ namespace GameArea
             }
             watch.Stop();
             handle.Complete();
-            Debug.Log($"done in {watch.Elapsed}");
             PathFoundTime?.Invoke(watch.Elapsed);
-            // Use path here
-            for (int i = 0; i < path.Length - 1; i++)
-            {
-                var pos1 = new Vector3(path[i].x, 0, path[i].y);
-                var pos2 = new Vector3(path[i + 1].x, 0, path[i + 1].y);
-                Debug.DrawLine(pos1, pos2, Color.red, 30);
-            }
             PathFound?.Invoke(path);
             nativeGrid.Dispose();
             path.Dispose();
             openSet.Dispose();
             closedSet.Dispose();
-            cameFrom.Dispose();
-            gScore.Dispose();
-            fScore.Dispose();
             _findPathCoroutineHandle = null;
             yield return null;
         }

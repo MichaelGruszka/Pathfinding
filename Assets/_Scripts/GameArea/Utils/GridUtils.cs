@@ -16,7 +16,9 @@ namespace GameArea.Utils
                     {
                         X = x,
                         Y = y,
-                        Obstacle = false
+                        Obstacle = false,
+                        Index = y * x + y,
+                        cameFromIndex = -1
                     };
                 }
             }

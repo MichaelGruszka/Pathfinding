@@ -6,141 +6,142 @@ using Unity.Mathematics;
 
 namespace PathFinding
 {
-    [BurstCompile]
-    public struct PathfindingJob : IJob
+  [BurstCompile]
+public struct PathfindingJob : IJob
+{
+    [ReadOnly] public int2 GridSize;
+    public NativeArray<GridCell> Grid;
+    [ReadOnly] public int2 Start;
+    [ReadOnly] public int2 End;
+    public NativeList<int2> Path;
+    public NativeArray<bool> OpenSet;
+    public NativeArray<bool> ClosedSet;
+
+    private int GetIndex(int2 pos)
     {
-        [ReadOnly] public int2 GridSize;
-        [ReadOnly] public NativeArray<GridCell> Grid;
-        [ReadOnly] public int2 Start;
-        [ReadOnly] public int2 End;
-        public NativeList<int2> Path;
-        public NativeArray<bool> OpenSet;
-        public NativeArray<bool> ClosedSet;
-        public NativeHashMap<int2, int2> CameFrom;
-        public NativeHashMap<int2, float> GScore;
-        public NativeHashMap<int2, float> FScore;
+        return pos.y * GridSize.x + pos.x;
+    }
 
-        private int GetIndex(int2 pos)
+    public void Execute()
+    {
+        int size = GridSize.x * GridSize.y;
+
+        for (int i = 0; i < size; i++)
         {
-            return pos.y * GridSize.x + pos.x;
+            OpenSet[i] = false;
+            ClosedSet[i] = false;
+            var gridCell = Grid[i];
+            gridCell.gScore = float.MaxValue;
+            gridCell.fScore = float.MaxValue;
+            Grid[i] = gridCell;
         }
 
-        public void Execute()
-        {
-            int size = GridSize.x * GridSize.y;
+        int startIndex = GetIndex(Start);
+        var startGridCell = Grid[startIndex];
+        startGridCell.gScore = 0;
+        startGridCell.fScore = SquaredDistance(Start, End);
+        Grid[startIndex] = startGridCell;
+        OpenSet[startIndex] = true;
 
-            for (int i = 0; i < size; i++)
+        while (HasOpenNodes())
+        {
+            int currentIndex = GetLowestFScoreNode();
+            int2 currentPos = IndexToPos(currentIndex);
+
+            if (currentPos.Equals(End))
             {
-                OpenSet[i] = false;
-                ClosedSet[i] = false;
+                ReconstructPath(currentIndex);
+                break;
             }
 
-            OpenSet[GetIndex(Start)] = true;
-            GScore[Start] = 0;
-            FScore[Start] = SquaredDistance(Start, End);
+            OpenSet[currentIndex] = false;
+            ClosedSet[currentIndex] = true;
 
-            while (HasOpenNodes())
+            NativeArray<int2> neighbors = GetNeighbors(currentPos);
+
+            foreach (int2 neighbor in neighbors)
             {
-                int2 current = GetLowestFScoreNode();
+                int neighborIndex = GetIndex(neighbor);
+                if (ClosedSet[neighborIndex] || Grid[neighborIndex].Obstacle)
+                    continue;
 
-                if (current.Equals(End))
+                float tentativeGScore = Grid[currentIndex].gScore + SquaredDistance(currentPos, neighbor);
+
+                if (!OpenSet[neighborIndex] || tentativeGScore < Grid[neighborIndex].gScore)
                 {
-                    ReconstructPath(current);
-                    break;
-                }
-
-                OpenSet[GetIndex(current)] = false;
-                ClosedSet[GetIndex(current)] = true;
-
-                NativeArray<int2> neighbors = GetNeighbors(current);
-
-                foreach (int2 neighbor in neighbors)
-                {
-                    if (ClosedSet[GetIndex(neighbor)] || Grid[GetIndex(neighbor)].Obstacle)
-                        continue;
-
-                    float tentativeGScore = GScore[current] + SquaredDistance(current, neighbor);
-
-                    if (!OpenSet[GetIndex(neighbor)] || tentativeGScore < GScore[neighbor])
-                    {
-                        CameFrom[neighbor] = current;
-                        GScore[neighbor] = tentativeGScore;
-                        FScore[neighbor] = GScore[neighbor] + SquaredDistance(neighbor, End);
-                        if (!OpenSet[GetIndex(neighbor)])
-                            OpenSet[GetIndex(neighbor)] = true;
-                    }
-                }
-                neighbors.Dispose();
-            }
-        }
-        private static float SquaredDistance(int2 a, int2 b)
-        {
-            int dx = a.x - b.x;
-            int dy = a.y - b.y;
-            return dx * dx + dy * dy;
-        }
-        private bool HasOpenNodes()
-        {
-            int size = GridSize.x * GridSize.y;
-            for (int i = 0; i < size; i++)
-            {
-                if (OpenSet[i])
-                    return true;
-            }
-            return false;
-        }
-
-        private int2 GetLowestFScoreNode()
-        {
-            int2 lowestNode = default;
-            float lowestFScore = float.MaxValue;
-
-            for (int i = 0; i < OpenSet.Length; i++)
-            {
-                if (OpenSet[i] && FScore.TryGetValue(IndexToPos(i), out float score) && score < lowestFScore)
-                {
-                    lowestFScore = score;
-                    lowestNode = IndexToPos(i);
+                    var neighborGridCell = Grid[neighborIndex];
+                    neighborGridCell.cameFromIndex = currentIndex;
+                    neighborGridCell.gScore = tentativeGScore;
+                    neighborGridCell.fScore = tentativeGScore + SquaredDistance(neighbor, End);
+                    Grid[neighborIndex] = neighborGridCell;
+                    OpenSet[neighborIndex] = true;
                 }
             }
-
-            return lowestNode;
-        }
-
-        private int2 IndexToPos(int index)
-        {
-            int y = index / GridSize.x;
-            int x = index % GridSize.x;
-            return new int2(x, y);
-        }
-
-        private NativeArray<int2> GetNeighbors(int2 pos)
-        {
-            NativeList<int2> neighbors = new NativeList<int2>(Allocator.Temp);
-            if (pos.x > 0) neighbors.Add(new int2(pos.x - 1, pos.y));
-            if (pos.x < GridSize.x - 1) neighbors.Add(new int2(pos.x + 1, pos.y));
-            if (pos.y > 0) neighbors.Add(new int2(pos.x, pos.y - 1));
-            if (pos.y < GridSize.y - 1) neighbors.Add(new int2(pos.x, pos.y + 1));
-            return neighbors;
-        }
-
-        private void ReconstructPath(int2 current)
-        {
-            NativeList<int2> totalPath = new NativeList<int2>(Allocator.Temp);
-            totalPath.Add(current);
-
-            while (CameFrom.ContainsKey(current))
-            {
-                current = CameFrom[current];
-                totalPath.Add(current);
-            }
-
-            for (int i = totalPath.Length - 1; i >= 0; i--)
-            {
-                Path.Add(totalPath[i]);
-            }
-
-            totalPath.Dispose();
+            neighbors.Dispose();
         }
     }
+
+    private static float SquaredDistance(int2 a, int2 b)
+    {
+        int dx = a.x - b.x;
+        int dy = a.y - b.y;
+        return dx * dx + dy * dy;
+    }
+
+    private bool HasOpenNodes()
+    {
+        int size = GridSize.x * GridSize.y;
+        for (int i = 0; i < size; i++)
+        {
+            if (OpenSet[i])
+                return true;
+        }
+        return false;
+    }
+
+    private int GetLowestFScoreNode()
+    {
+        int lowestIndex = -1;
+        float lowestFScore = float.MaxValue;
+
+        for (int i = 0; i < OpenSet.Length; i++)
+        {
+            if (OpenSet[i] && Grid[i].fScore < lowestFScore)
+            {
+                lowestFScore = Grid[i].fScore;
+                lowestIndex = i;
+            }
+        }
+
+        return lowestIndex;
+    }
+
+    private int2 IndexToPos(int index)
+    {
+        int y = index / GridSize.x;
+        int x = index % GridSize.x;
+        return new int2(x, y);
+    }
+
+    private NativeArray<int2> GetNeighbors(int2 pos)
+    {
+        NativeList<int2> neighbors = new NativeList<int2>(Allocator.Temp);
+        if (pos.x > 0) neighbors.Add(new int2(pos.x - 1, pos.y));
+        if (pos.x < GridSize.x - 1) neighbors.Add(new int2(pos.x + 1, pos.y));
+        if (pos.y > 0) neighbors.Add(new int2(pos.x, pos.y - 1));
+        if (pos.y < GridSize.y - 1) neighbors.Add(new int2(pos.x, pos.y + 1));
+        return neighbors;
+    }
+
+    private void ReconstructPath(int currentIndex)
+    {
+        while (currentIndex != -1)
+        {
+            var currentPose = IndexToPos(currentIndex);
+            Path.Add(currentPose);
+            currentIndex = Grid[currentIndex].cameFromIndex;
+        }
+    }
+}
+
 }

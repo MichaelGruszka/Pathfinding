@@ -63,7 +63,7 @@ namespace Player
         {
             _isMoving = true;
             _currentPath.Clear();
-            for (int i = 0; i < path.Length; i++)
+            for (int i = path.Length-1; i >=0; i--)
             {
                 _currentPath.Add(new Vector3(path[i].x, 0, path[i].y));
             }

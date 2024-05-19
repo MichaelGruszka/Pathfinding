@@ -6,6 +6,10 @@ namespace GameArea.Data
     {
         public int X;
         public int Y;
+        public int Index;
         public bool Obstacle;
+        public int cameFromIndex;
+        public float gScore;
+        public float fScore;
     }
 }
