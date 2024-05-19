@@ -7,7 +7,6 @@ using PathFinding;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 namespace GameArea
 {
@@ -101,7 +100,6 @@ namespace GameArea
             openSet.Dispose();
             closedSet.Dispose();
             _findPathCoroutineHandle = null;
-            yield return null;
         }
     }
 }
